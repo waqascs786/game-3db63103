@@ -1,0 +1,237 @@
+name: Build & Preview Game
+
+on:
+  workflow_dispatch:
+    inputs:
+      game_id:
+        description: 'Game ID'
+        required: true
+      game_name:
+        description: 'Game Name'
+        required: true
+      user_email:
+        description: 'User email for notifications'
+        required: false
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    outputs:
+      public_key: ${{ steps.upload.outputs.public_key }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.4
+          channel: stable
+
+      - name: Create Flutter project scaffold
+        run: |
+          cp pubspec.yaml _pubspec_bak.yaml
+          cp -r lib _lib_bak
+          flutter create --org com.quizninja --project-name game_app _scaffold
+          rm -rf android ios web linux macos windows test
+          mv _scaffold/android .
+          mv _scaffold/ios .
+          mv _scaffold/web .
+          mv _scaffold/linux .
+          mv _scaffold/macos .
+          mv _scaffold/windows .
+          mv _scaffold/test .
+          mv _scaffold/.gitignore .
+          rm -rf _scaffold _pubspec_bak.yaml _lib_bak
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+
+      - name: Upload APK to Appetize.io
+        id: upload
+        env:
+          APPETIZE_TOKEN: ${{ secrets.APPETIZE_TOKEN }}
+        run: |
+          SHORT_ID="${{ github.event.inputs.game_id }}"
+          SHORT_ID="${SHORT_ID%%-*}"
+          SHORT_ID="${SHORT_ID:0:20}"
+          RESPONSE=$(curl -s -X POST \
+            -H "X-API-KEY: $APPETIZE_TOKEN" \
+            -F "file=@build/app/outputs/flutter-apk/app-debug.apk" \
+            -F "platform=android" \
+            -F "tags[]=$SHORT_ID" \
+            https://api.appetize.io/v2/builds)
+          echo "Android response: $RESPONSE"
+          BUILD_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
+          echo "public_key=$BUILD_ID" >> $GITHUB_OUTPUT
+
+  build-ios:
+    runs-on: macos-14
+    outputs:
+      public_key: ${{ steps.upload.outputs.public_key }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.4
+          channel: stable
+
+      - name: Create Flutter project scaffold
+        run: |
+          cp pubspec.yaml _pubspec_bak.yaml
+          cp -r lib _lib_bak
+          flutter create --org com.quizninja --project-name game_app _scaffold
+          rm -rf android ios web linux macos windows test
+          mv _scaffold/android .
+          mv _scaffold/ios .
+          mv _scaffold/web .
+          mv _scaffold/linux .
+          mv _scaffold/macos .
+          mv _scaffold/windows .
+          mv _scaffold/test .
+          mv _scaffold/.gitignore .
+          rm -rf _scaffold _pubspec_bak.yaml _lib_bak
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build iOS simulator
+        run: |
+          flutter build ios --debug --simulator
+          cd build/ios/iphonesimulator
+          zip -r app-simulator.zip Runner.app
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator
+          path: build/ios/iphonesimulator/app-simulator.zip
+          retention-days: 7
+
+      - name: Upload iOS build to Appetize.io
+        id: upload
+        env:
+          APPETIZE_TOKEN: ${{ secrets.APPETIZE_TOKEN }}
+        run: |
+          SHORT_ID="${{ github.event.inputs.game_id }}"
+          SHORT_ID="${SHORT_ID%%-*}"
+          SHORT_ID="${SHORT_ID:0:20}"
+          RESPONSE=$(curl -s -X POST \
+            -H "X-API-KEY: $APPETIZE_TOKEN" \
+            -F "file=@build/ios/iphonesimulator/app-simulator.zip" \
+            -F "platform=ios" \
+            -F "tags[]=$SHORT_ID" \
+            https://api.appetize.io/v2/builds)
+          echo "iOS response: $RESPONSE"
+          BUILD_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
+          echo "public_key=$BUILD_ID" >> $GITHUB_OUTPUT
+
+  notify:
+    needs: [build-android, build-ios]
+    if: always() && needs.build-android.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write email script
+        run: |
+          cat > /tmp/send_email.py << "ENDSCRIPT"
+          import smtplib, os
+          from email.mime.text import MIMEText
+          from email.mime.multipart import MIMEMultipart
+          game_name = os.environ["GAME_NAME"]
+          user_email = os.environ["USER_EMAIL"]
+          android_url = os.environ["ANDROID_URL"]
+          ios_url = os.environ.get("IOS_URL", "")
+          android_artifact = os.environ.get("ANDROID_ARTIFACT_URL", "")
+          ios_artifact = os.environ.get("IOS_ARTIFACT_URL", "")
+          game_id = os.environ["GAME_ID"]
+          gmail_pass = os.environ["GMAIL_APP_PASSWORD"]
+          run_id = os.environ["RUN_ID"]
+          repo = os.environ["REPO"]
+          html = "<h2>Your game is ready!</h2>"
+          html += "<p><b>" + game_name + "</b> has been built and is ready to preview on Appetize.io.</p>"
+          html += "<h3>Live Preview</h3>"
+          html += "<p><b>Android:</b> <a href='" + android_url + "'>" + android_url + "</a></p>"
+          if ios_url:
+              html += "<p><b>iOS:</b> <a href='" + ios_url + "'>" + ios_url + "</a></p>"
+          html += "<h3>Download Builds</h3>"
+          if android_artifact:
+              html += "<p><b>Android APK:</b> <a href='" + android_artifact + "'>Download APK</a></p>"
+          if ios_artifact:
+              html += "<p><b>iOS Simulator:</b> <a href='" + ios_artifact + "'>Download iOS Build</a></p>"
+          html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
+          msg = MIMEMultipart("alternative")
+          msg["Subject"] = "Game Build Ready: " + game_name
+          msg["From"] = "Quiz Game Builder <waqascsme@gmail.com>"
+          msg["To"] = user_email
+          msg.attach(MIMEText(html, "html"))
+          server = smtplib.SMTP("smtp.gmail.com", 587)
+          server.starttls()
+          server.login("waqascsme@gmail.com", gmail_pass)
+          server.sendmail("waqascsme@gmail.com", user_email, msg.as_string())
+          server.quit()
+          print("Email sent to " + user_email)
+          ENDSCRIPT
+
+      - name: Send email via Gmail SMTP
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GAME_NAME: ${{ github.event.inputs.game_name }}
+          USER_EMAIL: ${{ github.event.inputs.user_email }}
+          GAME_ID: ${{ github.event.inputs.game_id }}
+          ANDROID_KEY: ${{ needs.build-android.outputs.public_key }}
+          IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$USER_EMAIL" ]; then
+            echo "No user email, skipping notification"
+            exit 0
+          fi
+          export ANDROID_URL="https://appetize.io/app/$ANDROID_KEY?autoplay=true"
+          export IOS_URL=""
+          export ANDROID_ARTIFACT_URL=""
+          export IOS_ARTIFACT_URL=""
+          if [ -n "$IOS_KEY" ]; then
+            export IOS_URL="https://appetize.io/app/$IOS_KEY?autoplay=true"
+          fi
+          export ANDROID_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-apk"
+          export IOS_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/ios-simulator"
+          if [ -z "$GMAIL_APP_PASSWORD" ]; then
+            echo "No Gmail app password, skipping email"
+            echo "::notice::Android Preview: $ANDROID_URL"
+            echo "::notice::iOS Preview: $IOS_URL"
+            exit 0
+          fi
+          python3 /tmp/send_email.py
+
+      - name: Print preview links
+        if: always()
+        env:
+          ANDROID_KEY: ${{ needs.build-android.outputs.public_key }}
+          IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
+        run: |
+          echo "=========================================="
+          echo "  GAME BUILD COMPLETE!"
+          echo "=========================================="
+          echo "Android: https://appetize.io/app/$ANDROID_KEY"
+          echo "iOS: https://appetize.io/app/$IOS_KEY"
+          echo "=========================================="
+          echo "::notice::Android Preview: https://appetize.io/app/$ANDROID_KEY"
+          echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
