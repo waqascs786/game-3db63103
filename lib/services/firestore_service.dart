@@ -16,10 +16,12 @@ class FirestoreService {
         final flat = Map<String, dynamic>.from(data);
         if (content is Map<String, dynamic>) {
           flat['levels'] = content['levels'] ?? [];
+          flat['packs'] = content['packs'] ?? [];
           if (content['sounds'] != null) flat['sounds'] = content['sounds'];
           if (content['design'] != null) flat['design'] = content['design'];
         }
         if (!flat.containsKey('levels') || flat['levels'] == null) flat['levels'] = [];
+        if (!flat.containsKey('packs') || flat['packs'] == null) flat['packs'] = [];
         if (!flat.containsKey('coinPacks') || flat['coinPacks'] == null) flat['coinPacks'] = [];
         if (!flat.containsKey('sounds') || flat['sounds'] == null) flat['sounds'] = {};
         if (!flat.containsKey('icon') || flat['icon'] == null) flat['icon'] = {};
