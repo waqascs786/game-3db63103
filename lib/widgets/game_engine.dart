@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_beep/flutter_beep.dart';
+import 'package:flutter/services.dart';
 import '../models/game_config.dart';
 
 enum _Screen { packSelect, levelSelect, playing, complete }
@@ -46,7 +46,7 @@ class _GameEngineState extends State<GameEngine> with SingleTickerProviderStateM
   int _internalLevelIndex = 0;
 
   void _playSound() {
-    try { FlutterBeep.beep(); } catch (_) {}
+    try { HapticFeedback.selectionClick(); } catch (_) {}
   }
 
   Color? _getColor(String key) {
@@ -944,7 +944,7 @@ class _GameEngineState extends State<GameEngine> with SingleTickerProviderStateM
                     decoration: BoxDecoration(
                       color: locked ? const Color(0xFF21262D) : const Color(0xFF161B22),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: locked ? Colors.grey.shade800 : _getColor('primary').withOpacity(0.3)),
+                      border: Border.all(color: locked ? Colors.grey.shade800 : (_getColor('primary') ?? Colors.white).withOpacity(0.3)),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
