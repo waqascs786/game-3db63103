@@ -12,6 +12,12 @@ on:
       user_email:
         description: 'User email for notifications'
         required: false
+      android_bundle_id:
+        description: 'Android bundle ID (e.g. com.mycompany.mygame)'
+        required: false
+      ios_bundle_id:
+        description: 'iOS bundle ID (e.g. com.mycompany.mygame)'
+        required: false
 
 jobs:
   build-android:
@@ -37,7 +43,9 @@ jobs:
         run: |
           cp pubspec.yaml _pubspec_bak.yaml
           cp -r lib _lib_bak
-          flutter create --org com.quizninja --project-name game_app _scaffold
+          ORG="com.android"
+          PROJ="game7"
+          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
           rm -rf android ios web linux macos windows test
           mv _scaffold/android .
           mv _scaffold/ios .
@@ -97,7 +105,9 @@ jobs:
         run: |
           cp pubspec.yaml _pubspec_bak.yaml
           cp -r lib _lib_bak
-          flutter create --org com.quizninja --project-name game_app _scaffold
+          ORG="com.ios"
+          PROJ="game7"
+          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
           rm -rf android ios web linux macos windows test
           mv _scaffold/android .
           mv _scaffold/ios .
