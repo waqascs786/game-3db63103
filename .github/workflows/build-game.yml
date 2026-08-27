@@ -27,6 +27,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Decode signing keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -57,18 +62,62 @@ jobs:
           mv _scaffold/.gitignore .
           rm -rf _scaffold _pubspec_bak.yaml _lib_bak
 
+      - name: Configure Android signing
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          cat > /tmp/configure_signing.py << "SIGNINGEOF"
+          import re, os, sys
+          alias = os.environ["ANDROID_KEY_ALIAS"]
+          password = os.environ["ANDROID_KEY_PASSWORD"]
+          store_pass = os.environ["ANDROID_KEYSTORE_PASSWORD"]
+          gradle_path = "android/app/build.gradle"
+          try:
+              with open(gradle_path, "r") as f:
+                  content = f.read()
+          except Exception as e:
+              print(f"Error reading build.gradle: {e}")
+              sys.exit(1)
+          signing_block = "    signingConfigs {\n"
+          signing_block += "      release {\n"
+          signing_block += "        keyAlias = \"" + alias + "\"\n"
+          signing_block += "        keyPassword = \"" + password + "\"\n"
+          signing_block += "        storeFile = file(\"/tmp/release.jks\")\n"
+          signing_block += "        storePassword = \"" + store_pass + "\"\n"
+          signing_block += "      }\n"
+          signing_block += "    }\n"
+          content = content.replace("android {", "android {\n" + signing_block, 1)
+          content = re.sub(r"(release \{)", "\1\n          signingConfig signingConfigs.release", content)
+          with open(gradle_path, "w") as f:
+              f.write(content)
+          print("Android signing configured successfully")
+          SIGNINGEOF
+          python3 /tmp/configure_signing.py
+
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build Android debug APK
-        run: flutter build apk --debug
+      - name: Build Android release APK
+        run: flutter build apk --release
+
+      - name: Build Android release AAB
+        run: flutter build appbundle --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
 
       - name: Upload APK to Appetize.io
         id: upload
@@ -80,7 +129,7 @@ jobs:
           SHORT_ID="${SHORT_ID:0:20}"
           RESPONSE=$(curl -s -X POST \
             -H "X-API-KEY: $APPETIZE_TOKEN" \
-            -F "file=@build/app/outputs/flutter-apk/app-debug.apk" \
+            -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
             -F "platform=android" \
             -F "tags[]=$SHORT_ID" \
             https://api.appetize.io/v2/builds)
@@ -170,6 +219,7 @@ jobs:
           ios_url = os.environ.get("IOS_URL", "")
           android_artifact = os.environ.get("ANDROID_ARTIFACT_URL", "")
           ios_artifact = os.environ.get("IOS_ARTIFACT_URL", "")
+          aab_artifact = os.environ.get("AAB_ARTIFACT_URL", "")
           game_id = os.environ["GAME_ID"]
           gmail_pass = os.environ["GMAIL_APP_PASSWORD"]
           run_id = os.environ["RUN_ID"]
@@ -185,6 +235,8 @@ jobs:
               html += "<p><b>Android APK:</b> <a href='" + android_artifact + "'>Download APK</a></p>"
           if ios_artifact:
               html += "<p><b>iOS Simulator:</b> <a href='" + ios_artifact + "'>Download iOS Build</a></p>"
+          if aab_artifact:
+              html += "<p><b>Play Store AAB:</b> <a href='" + aab_artifact + "'>Download AAB</a> (submit to Play Console)</p>"
           html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
           msg = MIMEMultipart("alternative")
           msg["Subject"] = "Game Build Ready: " + game_name
@@ -223,6 +275,7 @@ jobs:
           fi
           export ANDROID_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-apk"
           export IOS_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/ios-simulator"
+          export AAB_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-aab"
           if [ -z "$GMAIL_APP_PASSWORD" ]; then
             echo "No Gmail app password, skipping email"
             echo "::notice::Android Preview: $ANDROID_URL"
