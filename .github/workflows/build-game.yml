@@ -47,21 +47,17 @@ jobs:
           set -e
           ORG="com.android"
           PROJ="game7"
-          mv lib /tmp/_saved_lib
-          mv pubspec.yaml /tmp/_saved_pubspec
-          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
-          rm -rf android ios web linux macos windows test
-          mv _scaffold/android .
-          mv _scaffold/ios .
-          mv _scaffold/web .
-          mv _scaffold/linux .
-          mv _scaffold/macos .
-          mv _scaffold/windows .
-          mv _scaffold/test .
-          mv _scaffold/.gitignore .
-          rm -rf _scaffold
-          mv /tmp/_saved_lib lib
-          mv /tmp/_saved_pubspec pubspec.yaml
+          rm -rf android ios web linux macos windows test .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
+          cd /tmp && flutter create --org "$ORG" --project-name "$PROJ" _scaffold
+          cp -r /tmp/_scaffold/android "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/ios "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/web "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/linux "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/macos "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/windows "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/test "$GITHUB_WORKSPACE/"
+          cp /tmp/_scaffold/.gitignore "$GITHUB_WORKSPACE/"
+          rm -rf /tmp/_scaffold
           ls -la lib/main.dart
 
       - name: Configure Android signing
@@ -123,21 +119,21 @@ jobs:
 
       - name: Create Flutter project scaffold
         run: |
-          cp pubspec.yaml _pubspec_bak.yaml
-          cp -r lib _lib_bak
-          ORG="com.ios"
+          set -e
+          ORG="com.quizninja"
           PROJ="game7"
-          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
-          rm -rf android ios web linux macos windows test
-          mv _scaffold/android .
-          mv _scaffold/ios .
-          mv _scaffold/web .
-          mv _scaffold/linux .
-          mv _scaffold/macos .
-          mv _scaffold/windows .
-          mv _scaffold/test .
-          mv _scaffold/.gitignore .
-          rm -rf _scaffold _pubspec_bak.yaml _lib_bak
+          rm -rf android ios web linux macos windows test .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
+          cd /tmp && flutter create --org "$ORG" --project-name "$PROJ" _scaffold
+          cp -r /tmp/_scaffold/android "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/ios "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/web "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/linux "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/macos "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/windows "$GITHUB_WORKSPACE/"
+          cp -r /tmp/_scaffold/test "$GITHUB_WORKSPACE/"
+          cp /tmp/_scaffold/.gitignore "$GITHUB_WORKSPACE/"
+          rm -rf /tmp/_scaffold
+          ls -la lib/main.dart
 
       - name: Get dependencies
         run: flutter pub get
