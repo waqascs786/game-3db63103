@@ -62,33 +62,56 @@ jobs:
 
       - name: Configure Android signing
         run: |
-          cat > /tmp/configure_signing.py << "SIGNINGEOF"
-          import re, sys
-          alias = "platform_release"
-          password = "QuizNinja2024!"
-          store_pass = "QuizNinja2024!"
-          gradle_path = "android/app/build.gradle"
-          try:
-              with open(gradle_path, "r") as f:
-                  content = f.read()
-          except Exception as e:
-              print(f"Error reading build.gradle: {e}")
-              sys.exit(1)
-          signing_block = "    signingConfigs {\n"
-          signing_block += "      release {\n"
-          signing_block += "        keyAlias = \"" + alias + "\"\n"
-          signing_block += "        keyPassword = \"" + password + "\"\n"
-          signing_block += "        storeFile = file(\"/tmp/release.jks\")\n"
-          signing_block += "        storePassword = \"" + store_pass + "\"\n"
-          signing_block += "      }\n"
-          signing_block += "    }\n"
-          content = content.replace("android {", "android {\n" + signing_block, 1)
-          content = re.sub(r"(release \{)", "\1\n          signingConfig signingConfigs.release", content)
-          with open(gradle_path, "w") as f:
-              f.write(content)
-          print("Android signing configured successfully")
-          SIGNINGEOF
-          python3 /tmp/configure_signing.py
+          NS=$(grep -oP "namespace\s*=\s*\"[^"]*\"" android/app/build.gradle | head -1 | grep -oP "\"[^"]*\"" | tr -d '"')
+          APPID=$(grep -oP "applicationId\s*=\s*\"[^"]*\"" android/app/build.gradle | head -1 | grep -oP "\"[^"]*\"" | tr -d '"')
+          cat > android/app/build.gradle << GRADLEOF
+          plugins {
+              id "com.android.application"
+              id "kotlin-android"
+              id "dev.flutter.flutter-gradle-plugin"
+          }
+
+          android {
+              signingConfigs {
+                  release {
+                      keyAlias = "platform_release"
+                      keyPassword = "QuizNinja2024!"
+                      storeFile = file("/tmp/release.jks")
+                      storePassword = "QuizNinja2024!"
+                  }
+              }
+              namespace = "${NS}"
+              compileSdk = flutter.compileSdkVersion
+              ndkVersion = flutter.ndkVersion
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_1_8
+                  targetCompatibility = JavaVersion.VERSION_1_8
+              }
+
+              kotlinOptions {
+                  jvmTarget = JavaVersion.VERSION_1_8
+              }
+
+              defaultConfig {
+                  applicationId = "${APPID}"
+                  minSdk = flutter.minSdkVersion
+                  targetSdk = flutter.targetSdkVersion
+                  versionCode = flutter.versionCode
+                  versionName = flutter.versionName
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig = signingConfigs.release
+                  }
+              }
+          }
+
+          flutter {
+              source = "../"
+          }
+          GRADLEOF
 
       - name: Get dependencies
         run: flutter pub get
