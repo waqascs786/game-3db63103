@@ -18,6 +18,7 @@ jobs:
     runs-on: macos-14
     outputs:
       public_key: ${{ steps.upload.outputs.public_key }}
+      ios_url: ${{ steps.release.outputs.ios_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +38,7 @@ jobs:
       - name: Create Flutter scaffold in workspace
         run: |
           ORG="com.quizninja"
-          PROJ="game7"
+          PROJ="gameApp"
           flutter create --org "$ORG" --project-name "$PROJ" . 2>&1 | tail -5
 
       - name: Restore source files
@@ -66,6 +67,21 @@ jobs:
           path: build/ios/iphonesimulator/app-simulator.zip
           retention-days: 7
 
+      - name: Create GitHub Release with download
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="ios-${{ github.event.inputs.game_id }}"
+          gh release delete "$TAG" --repo "${{ github.repository }}" -y 2>/dev/null || true
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --title "iOS Build: ${{ github.event.inputs.game_name }}" \
+            --notes "iOS simulator build for ${{ github.event.inputs.game_name }}" \
+            build/ios/iphonesimulator/app-simulator.zip#ios-simulator.zip
+          IOS_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/ios-simulator.zip"
+          echo "ios_url=$IOS_URL" >> $GITHUB_OUTPUT
+
       - name: Upload iOS build to Appetize.io
         id: upload
         env:
@@ -84,18 +100,6 @@ jobs:
           BUILD_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
           echo "public_key=$BUILD_ID" >> $GITHUB_OUTPUT
 
-      - name: Print preview link
-        if: always()
-        env:
-          IOS_KEY: ${{ steps.upload.outputs.public_key }}
-        run: |
-          echo "=========================================="
-          echo "  iOS BUILD COMPLETE!"
-          echo "=========================================="
-          echo "iOS: https://appetize.io/app/$IOS_KEY"
-          echo "=========================================="
-          echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
-
   notify:
     needs: [build-ios]
     if: always() && needs.build-ios.result == 'success'
@@ -109,16 +113,17 @@ jobs:
           from email.mime.multipart import MIMEMultipart
           game_name = os.environ["GAME_NAME"]
           user_email = os.environ["USER_EMAIL"]
-          ios_url = os.environ["IOS_URL"]
-          ios_artifact = os.environ.get("IOS_ARTIFACT_URL", "")
+          appetize_url = os.environ["APPETIZE_URL"]
+          ios_url = os.environ.get("IOS_URL", "")
           game_id = os.environ["GAME_ID"]
           gmail_pass = os.environ["GMAIL_APP_PASSWORD"]
-          run_id = os.environ["RUN_ID"]
-          repo = os.environ["REPO"]
           html = "<h2>Your iOS build is ready!</h2>"
-          html += "<p><b>" + game_name + "</b> iOS simulator build is ready to preview on Appetize.io.</p>"
+          html += "<p><b>" + game_name + "</b> iOS simulator build is ready.</p>"
           html += "<h3>Live Preview</h3>"
-          html += "<p><b>iOS:</b> <a href='" + ios_url + "'>" + ios_url + "</a></p>"
+          html += "<p><b>iOS:</b> <a href='" + appetize_url + "'>" + appetize_url + "</a></p>"
+          if ios_url:
+              html += "<h3>Download</h3>"
+              html += "<p><b>iOS Simulator:</b> <a href='" + ios_url + "'>Download Build</a></p>"
           html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
           msg = MIMEMultipart("alternative")
           msg["Subject"] = "iOS Build Ready: " + game_name
@@ -140,18 +145,16 @@ jobs:
           USER_EMAIL: ${{ github.event.inputs.user_email }}
           GAME_ID: ${{ github.event.inputs.game_id }}
           IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
-          RUN_ID: ${{ github.run_id }}
-          REPO: ${{ github.repository }}
+          IOS_URL: ${{ needs.build-ios.outputs.ios_url }}
         run: |
           if [ -z "$USER_EMAIL" ]; then
             echo "No user email, skipping notification"
             exit 0
           fi
-          export IOS_URL="https://appetize.io/app/$IOS_KEY?autoplay=true"
-          export IOS_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/ios-simulator"
+          export APPETIZE_URL="https://appetize.io/app/$IOS_KEY?autoplay=true"
           if [ -z "$GMAIL_APP_PASSWORD" ]; then
             echo "No Gmail app password, skipping email"
-            echo "::notice::iOS Preview: $IOS_URL"
+            echo "::notice::iOS Preview: $APPETIZE_URL"
             exit 0
           fi
           python3 /tmp/send_email.py
@@ -160,10 +163,12 @@ jobs:
         if: always()
         env:
           IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
+          IOS_URL: ${{ needs.build-ios.outputs.ios_url }}
         run: |
           echo "=========================================="
           echo "  iOS BUILD COMPLETE!"
           echo "=========================================="
-          echo "iOS: https://appetize.io/app/$IOS_KEY"
+          echo "iOS Preview: https://appetize.io/app/$IOS_KEY"
+          echo "iOS Download: $IOS_URL"
           echo "=========================================="
           echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
