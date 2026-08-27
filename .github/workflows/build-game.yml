@@ -117,8 +117,8 @@ jobs:
             --notes "Automated build for ${{ github.event.inputs.game_name }}" \
             build/app/outputs/flutter-apk/app-release.apk \
             build/app/outputs/bundle/release/app-release.aab
-          APK_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/game-release.apk"
-          AAB_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/game-release.aab"
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/app-release.apk"
+          AAB_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/app-release.aab"
           echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
           echo "aab_url=$AAB_URL" >> $GITHUB_OUTPUT
 
