@@ -73,10 +73,10 @@ jobs:
 
       - name: Debug state before build
         run: |
-          echo "=== CWD ===" && pwd && echo "=== lib/ ===" && ls -la lib/ && echo "=== main.dart ===" && cat lib/main.dart | head -3 && echo "=== .dart_tool ===" && ls -la .dart_tool/ 2>&1 && echo "=== build.gradle ===" && head -5 android/app/build.gradle
+          echo "=== CWD ===" && pwd && echo "=== lib/ ===" && ls -la lib/ && echo "=== main.dart ===" && cat lib/main.dart | head -3 && echo "=== .dart_tool ===" && ls .dart_tool/ 2>&1 && echo "=== package_config ===" && cat .dart_tool/package_config.json 2>&1 | head -10 && echo "=== build.gradle ===" && head -5 android/app/build.gradle && echo "=== flutter source ===" && grep -r "source" android/app/build.gradle
 
       - name: Build Android release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --verbose 2>&1 | tail -50
 
       - name: Build Android release AAB
         run: flutter build appbundle --release
