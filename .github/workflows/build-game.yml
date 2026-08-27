@@ -21,9 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Decode signing keystore
-        run: echo "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" | base64 -d > /tmp/release.jks
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -36,68 +33,60 @@ jobs:
           flutter-version: 3.27.4
           channel: stable
 
-      - name: Create Flutter project scaffold
+      - name: Save source files
         run: |
-          set -e
+          mkdir -p /tmp/saved
+          cp -r lib /tmp/saved/lib
+          cp pubspec.yaml /tmp/saved/pubspec.yaml
+          cp pubspec.lock /tmp/saved/pubspec.lock 2>/dev/null || true
+
+      - name: Create Flutter scaffold in workspace
+        run: |
           ORG="com.android"
           PROJ="game7"
-          TEMP_DIR=$(mktemp -d)
-          flutter create --no-pub --org "$ORG" --project-name "$PROJ" "$TEMP_DIR/_scaffold"
-          rm -rf android ios web linux macos windows test .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata
-          cp -r "$TEMP_DIR/_scaffold/android" .
-          cp -r "$TEMP_DIR/_scaffold/ios" .
-          cp -r "$TEMP_DIR/_scaffold/web" .
-          cp -r "$TEMP_DIR/_scaffold/linux" .
-          cp -r "$TEMP_DIR/_scaffold/macos" .
-          cp -r "$TEMP_DIR/_scaffold/windows" .
-          cp -r "$TEMP_DIR/_scaffold/test" .
-          cp "$TEMP_DIR/_scaffold/.gitignore" .
-          rm -rf "$TEMP_DIR"
+          flutter create --org "$ORG" --project-name "$PROJ" . 2>&1 | tail -5
 
-      - name: Verify project structure
+      - name: Restore source files
         run: |
-          echo "=== CWD ===" && pwd
-          echo "=== lib/ ===" && ls -la lib/
-          echo "=== main.dart ===" && head -3 lib/main.dart
-          echo "=== android/ ===" && ls -la android/
-          echo "=== android/app/ ===" && ls -la android/app/
-          echo "=== pubspec.yaml ===" && head -5 pubspec.yaml
-
-      - name: Configure Android signing
-        run: echo "aW1wb3J0IHJlCndpdGggb3BlbignYW5kcm9pZC9hcHAvYnVpbGQuZ3JhZGxlJykgYXMgZjogYyA9IGYucmVhZCgpCm5zID0gcmUuc2VhcmNoKHInbmFtZXNwYWNlXHMqPVxzKlwiKFteXCJdKylcIicsIGMpLmdyb3VwKDEpCmFpZCA9IHJlLnNlYXJjaChyJ2FwcGxpY2F0aW9uSWRccyo9XHMqXCIoW15cIl0rKVwiJywgYykuZ3JvdXAoMSkKQkxPQ0sgPSAiIiJwbHVnaW5zIHsKICAgIGlkICJjb20uYW5kcm9pZC5hcHBsaWNhdGlvbiIKICAgIGlkICJrb3RsaW4tYW5kcm9pZCIKICAgIGlkICJkZXYuZmx1dHRlci5mbHV0dGVyLWdyYWRsZS1wbHVnaW4iCn0KCmFuZHJvaWQgewogICAgc2lnbmluZ0NvbmZpZ3MgewogICAgICAgIHJlbGVhc2UgewogICAgICAgICAgICBrZXlBbGlhcyA9ICJLRVlfQUxJQVMiCiAgICAgICAgICAgIGtleVBhc3N3b3JkID0gIktFWV9QQVNTV09SRCIKICAgICAgICAgICAgc3RvcmVGaWxlID0gZmlsZSgiL3RtcC9yZWxlYXNlLmprcyIpCiAgICAgICAgICAgIHN0b3JlUGFzc3dvcmQgPSAiU1RPUkVfUEFTUyIKICAgICAgICB9CiAgICB9CiAgICBuYW1lc3BhY2UgPSAiTlNfUExBQ0VIT0xERVIiCiAgICBjb21waWxlU2RrID0gZmx1dHRlci5jb21waWxlU2RrVmVyc2lvbgogICAgbmRrVmVyc2lvbiA9IGZsdXR0ZXIubmRrVmVyc2lvbgoKICAgIGNvbXBpbGVPcHRpb25zIHsKICAgICAgICBzb3VyY2VDb21wYXRpYmlsaXR5ID0gSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgICAgICB0YXJnZXRDb21wYXRpYmlsaXR5ID0gSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgIH0KCiAgICBrb3RsaW5PcHRpb25zIHsKICAgICAgICBqdm1UYXJnZXQgPSBKYXZhVmVyc2lvbi5WRVJTSU9OXzFfOAogICAgfQoKICAgIGRlZmF1bHRDb25maWcgewogICAgICAgIGFwcGxpY2F0aW9uSWQgPSAiQVBQSURfUExBQ0VIT0xERVIiCiAgICAgICAgbWluU2RrID0gZmx1dHRlci5taW5TZGtWZXJzaW9uCiAgICAgICAgdGFyZ2V0U2RrID0gZmx1dHRlci50YXJnZXRTZGtWZXJzaW9uCiAgICAgICAgdmVyc2lvbkNvZGUgPSBmbHV0dGVyLnZlcnNpb25Db2RlCiAgICAgICAgdmVyc2lvbk5hbWUgPSBmbHV0dGVyLnZlcnNpb25OYW1lCiAgICB9CgogICAgYnVpbGRUeXBlcyB7CiAgICAgICAgcmVsZWFzZSB7CiAgICAgICAgICAgIHNpZ25pbmdDb25maWcgPSBzaWduaW5nQ29uZmlncy5yZWxlYXNlCiAgICAgICAgfQogICAgfQp9CgpmbHV0dGVyIHsKICAgIHNvdXJjZSA9ICIuLi8iCn0KIiIiCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnS0VZX0FMSUFTJywgJ3BsYXRmb3JtX3JlbGVhc2UnKQpCTE9DSyA9IEJMT0NLLnJlcGxhY2UoJ0tFWV9QQVNTV09SRCcsICdRdWl6TmluamEyMDI0IScpCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnU1RPUkVfUEFTUycsICdRdWl6TmluamEyMDI0IScpCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnTlNfUExBQ0VIT0xERVInLCBucykKQkxPQ0sgPSBCTE9DSy5yZXBsYWNlKCdBUFBJRF9QTEFDRUhPTERFUicsIGFpZCkKd2l0aCBvcGVuKCdhbmRyb2lkL2FwcC9idWlsZC5ncmFkbGUnLCAndycpIGFzIGY6IGYud3JpdGUoQkxPQ0spCnByaW50KCdTaWduaW5nIGNvbmZpZ3VyZWQnKQo=" | base64 -d > /tmp/configure_signing.py && python3 /tmp/configure_signing.py
+          rm -rf lib
+          cp -r /tmp/saved/lib .
+          cp /tmp/saved/pubspec.yaml .
+          cp /tmp/saved/pubspec.lock . 2>/dev/null || true
+          echo "=== Verify ==="
+          ls -la lib/main.dart
+          head -3 lib/main.dart
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build Android debug APK
+      - name: Decode signing keystore
+        run: echo "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" | base64 -d > /tmp/release.jks
+
+      - name: Configure Android signing
         run: |
-          set +e
-          flutter build apk --debug > build_debug.log 2>&1
-          EXIT=$?
-          echo "=== DEBUG BUILD EXIT CODE: $EXIT ==="
-          tail -80 build_debug.log
-          exit $EXIT
+          python3 -c "
+          import re
+          with open('android/app/build.gradle') as f: c = f.read()
+          if 'signingConfigs' in c:
+              print('Signing already configured')
+          else:
+              signing = '\n    signingConfigs {\n        release {\n            keyAlias = \'platform_release\'\n            keyPassword = \'QuizNinja2024!\'\n            storeFile = file(\'/tmp/release.jks\')\n            storePassword = \'QuizNinja2024!\'\n        }\n    }\n'
+              c = c.replace('android {', 'android {' + signing, 1)
+              c = c.replace('signingConfig = signingConfigs.debug', 'signingConfig = signingConfigs.release')
+              with open('android/app/build.gradle', 'w') as f: f.write(c)
+              print('Signing configured')
+          "
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
 
       - name: Build Android release APK
-        run: |
-          set +e
-          flutter build apk --release > build_release.log 2>&1
-          EXIT=$?
-          echo "=== RELEASE BUILD EXIT CODE: $EXIT ==="
-          tail -80 build_release.log
-          exit $EXIT
+        run: flutter build apk --release
 
       - name: Build Android release AAB
-        run: |
-          set +e
-          flutter build appbundle --release > build_aab.log 2>&1
-          EXIT=$?
-          echo "=== AAB BUILD EXIT CODE: $EXIT ==="
-          tail -80 build_aab.log
-          exit $EXIT
+        run: flutter build appbundle --release
 
       - name: Upload APK artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
@@ -105,7 +94,6 @@ jobs:
           retention-days: 7
 
       - name: Upload AAB artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-aab
@@ -114,7 +102,6 @@ jobs:
 
       - name: Upload APK to Appetize.io
         id: upload
-        if: success()
         env:
           APPETIZE_TOKEN: ${{ secrets.APPETIZE_TOKEN }}
         run: |
