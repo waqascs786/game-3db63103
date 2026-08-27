@@ -95,3 +95,78 @@ jobs:
           echo "iOS: https://appetize.io/app/$IOS_KEY"
           echo "=========================================="
           echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
+
+  notify:
+    needs: [build-ios]
+    if: always() && needs.build-ios.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write email script
+        run: |
+          cat > /tmp/send_email.py << "ENDSCRIPT"
+          import smtplib, os
+          from email.mime.text import MIMEText
+          from email.mime.multipart import MIMEMultipart
+          game_name = os.environ["GAME_NAME"]
+          user_email = os.environ["USER_EMAIL"]
+          ios_url = os.environ["IOS_URL"]
+          ios_artifact = os.environ.get("IOS_ARTIFACT_URL", "")
+          game_id = os.environ["GAME_ID"]
+          gmail_pass = os.environ["GMAIL_APP_PASSWORD"]
+          run_id = os.environ["RUN_ID"]
+          repo = os.environ["REPO"]
+          html = "<h2>Your iOS build is ready!</h2>"
+          html += "<p><b>" + game_name + "</b> iOS simulator build is ready to preview on Appetize.io.</p>"
+          html += "<h3>Live Preview</h3>"
+          html += "<p><b>iOS:</b> <a href='" + ios_url + "'>" + ios_url + "</a></p>"
+          html += "<h3>Download Builds</h3>"
+          if ios_artifact:
+              html += "<p><b>iOS Simulator:</b> <a href='" + ios_artifact + "'>Download iOS Build</a></p>"
+          html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
+          msg = MIMEMultipart("alternative")
+          msg["Subject"] = "iOS Build Ready: " + game_name
+          msg["From"] = "Quiz Game Builder <waqascsme@gmail.com>"
+          msg["To"] = user_email
+          msg.attach(MIMEText(html, "html"))
+          server = smtplib.SMTP("smtp.gmail.com", 587)
+          server.starttls()
+          server.login("waqascsme@gmail.com", gmail_pass)
+          server.sendmail("waqascsme@gmail.com", user_email, msg.as_string())
+          server.quit()
+          print("Email sent to " + user_email)
+          ENDSCRIPT
+
+      - name: Send email via Gmail SMTP
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GAME_NAME: ${{ github.event.inputs.game_name }}
+          USER_EMAIL: ${{ github.event.inputs.user_email }}
+          GAME_ID: ${{ github.event.inputs.game_id }}
+          IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$USER_EMAIL" ]; then
+            echo "No user email, skipping notification"
+            exit 0
+          fi
+          export IOS_URL="https://appetize.io/app/$IOS_KEY?autoplay=true"
+          export IOS_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/ios-simulator"
+          if [ -z "$GMAIL_APP_PASSWORD" ]; then
+            echo "No Gmail app password, skipping email"
+            echo "::notice::iOS Preview: $IOS_URL"
+            exit 0
+          fi
+          python3 /tmp/send_email.py
+
+      - name: Print preview links
+        if: always()
+        env:
+          IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
+        run: |
+          echo "=========================================="
+          echo "  iOS BUILD COMPLETE!"
+          echo "=========================================="
+          echo "iOS: https://appetize.io/app/$IOS_KEY"
+          echo "=========================================="
+          echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
