@@ -71,11 +71,22 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Pre-build diagnostics
+        run: |
+          echo "=== package_config.json ==="
+          cat .dart_tool/package_config.json 2>&1 | head -20
+          echo "=== flutter.gradle source check ==="
+          grep -r "source" android/app/build.gradle 2>&1
+          echo "=== android/build.gradle ==="
+          cat android/build.gradle 2>&1 | head -15
+          echo "=== android/settings.gradle ==="
+          cat android/settings.gradle 2>&1
+
       - name: Build Android release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --verbose > build_apk.log 2>&1; EXIT=$?; tail -50 build_apk.log; exit $EXIT
 
       - name: Build Android release AAB
-        run: flutter build appbundle --release
+        run: flutter build appbundle --release --verbose > build_aab.log 2>&1; EXIT=$?; tail -50 build_aab.log; exit $EXIT
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
