@@ -45,9 +45,9 @@ jobs:
       - name: Create Flutter project scaffold
         run: |
           set -e
-          ORG="com.android"
+          ORG="com.quizninja"
           PROJ="game7"
-          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
+          flutter create --no-pub --org "$ORG" --project-name "$PROJ" _scaffold
           rm -rf android ios web linux macos windows test
           cp -r _scaffold/android .
           cp -r _scaffold/ios .
@@ -58,8 +58,11 @@ jobs:
           cp -r _scaffold/test .
           cp _scaffold/.gitignore .
           rm -rf _scaffold
-          rm -rf .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
+          rm -rf .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata
+      - name: Verify lib exists
+        run: |
           ls -la lib/main.dart
+          head -5 lib/main.dart
 
       - name: Configure Android signing
         run: echo "aW1wb3J0IHJlCndpdGggb3BlbignYW5kcm9pZC9hcHAvYnVpbGQuZ3JhZGxlJykgYXMgZjogYyA9IGYucmVhZCgpCm5zID0gcmUuc2VhcmNoKHInbmFtZXNwYWNlXHMqPVxzKlwiKFteXCJdKylcIicsIGMpLmdyb3VwKDEpCmFpZCA9IHJlLnNlYXJjaChyJ2FwcGxpY2F0aW9uSWRccyo9XHMqXCIoW15cIl0rKVwiJywgYykuZ3JvdXAoMSkKQkxPQ0sgPSAiIiJwbHVnaW5zIHsKICAgIGlkICJjb20uYW5kcm9pZC5hcHBsaWNhdGlvbiIKICAgIGlkICJrb3RsaW4tYW5kcm9pZCIKICAgIGlkICJkZXYuZmx1dHRlci5mbHV0dGVyLWdyYWRsZS1wbHVnaW4iCn0KCmFuZHJvaWQgewogICAgc2lnbmluZ0NvbmZpZ3MgewogICAgICAgIHJlbGVhc2UgewogICAgICAgICAgICBrZXlBbGlhcyA9ICJLRVlfQUxJQVMiCiAgICAgICAgICAgIGtleVBhc3N3b3JkID0gIktFWV9QQVNTV09SRCIKICAgICAgICAgICAgc3RvcmVGaWxlID0gZmlsZSgiL3RtcC9yZWxlYXNlLmprcyIpCiAgICAgICAgICAgIHN0b3JlUGFzc3dvcmQgPSAiU1RPUkVfUEFTUyIKICAgICAgICB9CiAgICB9CiAgICBuYW1lc3BhY2UgPSAiTlNfUExBQ0VIT0xERVIiCiAgICBjb21waWxlU2RrID0gZmx1dHRlci5jb21waWxlU2RrVmVyc2lvbgogICAgbmRrVmVyc2lvbiA9IGZsdXR0ZXIubmRrVmVyc2lvbgoKICAgIGNvbXBpbGVPcHRpb25zIHsKICAgICAgICBzb3VyY2VDb21wYXRpYmlsaXR5ID0gSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgICAgICB0YXJnZXRDb21wYXRpYmlsaXR5ID0gSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgIH0KCiAgICBrb3RsaW5PcHRpb25zIHsKICAgICAgICBqdm1UYXJnZXQgPSBKYXZhVmVyc2lvbi5WRVJTSU9OXzFfOAogICAgfQoKICAgIGRlZmF1bHRDb25maWcgewogICAgICAgIGFwcGxpY2F0aW9uSWQgPSAiQVBQSURfUExBQ0VIT0xERVIiCiAgICAgICAgbWluU2RrID0gZmx1dHRlci5taW5TZGtWZXJzaW9uCiAgICAgICAgdGFyZ2V0U2RrID0gZmx1dHRlci50YXJnZXRTZGtWZXJzaW9uCiAgICAgICAgdmVyc2lvbkNvZGUgPSBmbHV0dGVyLnZlcnNpb25Db2RlCiAgICAgICAgdmVyc2lvbk5hbWUgPSBmbHV0dGVyLnZlcnNpb25OYW1lCiAgICB9CgogICAgYnVpbGRUeXBlcyB7CiAgICAgICAgcmVsZWFzZSB7CiAgICAgICAgICAgIHNpZ25pbmdDb25maWcgPSBzaWduaW5nQ29uZmlncy5yZWxlYXNlCiAgICAgICAgfQogICAgfQp9CgpmbHV0dGVyIHsKICAgIHNvdXJjZSA9ICIuLi8iCn0KIiIiCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnS0VZX0FMSUFTJywgJ3BsYXRmb3JtX3JlbGVhc2UnKQpCTE9DSyA9IEJMT0NLLnJlcGxhY2UoJ0tFWV9QQVNTV09SRCcsICdRdWl6TmluamEyMDI0IScpCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnU1RPUkVfUEFTUycsICdRdWl6TmluamEyMDI0IScpCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnTlNfUExBQ0VIT0xERVInLCBucykKQkxPQ0sgPSBCTE9DSy5yZXBsYWNlKCdBUFBJRF9QTEFDRUhPTERFUicsIGFpZCkKd2l0aCBvcGVuKCdhbmRyb2lkL2FwcC9idWlsZC5ncmFkbGUnLCAndycpIGFzIGY6IGYud3JpdGUoQkxPQ0spCnByaW50KCdTaWduaW5nIGNvbmZpZ3VyZWQnKQo=" | base64 -d > /tmp/configure_signing.py && python3 /tmp/configure_signing.py
