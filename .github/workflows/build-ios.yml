@@ -16,6 +16,8 @@ on:
 jobs:
   build-ios:
     runs-on: macos-14
+    permissions:
+      contents: write
     outputs:
       public_key: ${{ steps.upload.outputs.public_key }}
       ios_url: ${{ steps.release.outputs.ios_url }}
