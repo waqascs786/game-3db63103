@@ -142,11 +142,6 @@ jobs:
           html += "<p><b>" + game_name + "</b> has been built and is ready to preview on Appetize.io.</p>"
           html += "<h3>Live Preview</h3>"
           html += "<p><b>Android:</b> <a href='" + android_url + "'>" + android_url + "</a></p>"
-          html += "<h3>Download Builds</h3>"
-          if android_artifact:
-              html += "<p><b>Android APK:</b> <a href='" + android_artifact + "'>Download APK</a></p>"
-          if aab_artifact:
-              html += "<p><b>Play Store AAB:</b> <a href='" + aab_artifact + "'>Download AAB</a> (submit to Play Console)</p>"
           html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
           msg = MIMEMultipart("alternative")
           msg["Subject"] = "Game Build Ready: " + game_name
