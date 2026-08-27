@@ -119,9 +119,6 @@ jobs:
           html += "<p><b>" + game_name + "</b> iOS simulator build is ready to preview on Appetize.io.</p>"
           html += "<h3>Live Preview</h3>"
           html += "<p><b>iOS:</b> <a href='" + ios_url + "'>" + ios_url + "</a></p>"
-          html += "<h3>Download Builds</h3>"
-          if ios_artifact:
-              html += "<p><b>iOS Simulator:</b> <a href='" + ios_artifact + "'>Download iOS Build</a></p>"
           html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
           msg = MIMEMultipart("alternative")
           msg["Subject"] = "iOS Build Ready: " + game_name
