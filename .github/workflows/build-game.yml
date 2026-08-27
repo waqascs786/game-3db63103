@@ -12,12 +12,6 @@ on:
       user_email:
         description: 'User email for notifications'
         required: false
-      android_bundle_id:
-        description: 'Android bundle ID (e.g. com.mycompany.mygame)'
-        required: false
-      ios_bundle_id:
-        description: 'iOS bundle ID (e.g. com.mycompany.mygame)'
-        required: false
 
 jobs:
   build-android:
@@ -59,11 +53,15 @@ jobs:
           cp -r "$TEMP_DIR/_scaffold/test" .
           cp "$TEMP_DIR/_scaffold/.gitignore" .
           rm -rf "$TEMP_DIR"
+
       - name: Verify project structure
         run: |
-          find . -name "main.dart" -type f
-          ls -la lib/main.dart
-          head -3 lib/main.dart
+          echo "=== CWD ===" && pwd
+          echo "=== lib/ ===" && ls -la lib/
+          echo "=== main.dart ===" && head -3 lib/main.dart
+          echo "=== android/ ===" && ls -la android/
+          echo "=== android/app/ ===" && ls -la android/app/
+          echo "=== pubspec.yaml ===" && head -5 pubspec.yaml
 
       - name: Configure Android signing
         run: echo "aW1wb3J0IHJlCndpdGggb3BlbignYW5kcm9pZC9hcHAvYnVpbGQuZ3JhZGxlJykgYXMgZjogYyA9IGYucmVhZCgpCm5zID0gcmUuc2VhcmNoKHInbmFtZXNwYWNlXHMqPVxzKlwiKFteXCJdKylcIicsIGMpLmdyb3VwKDEpCmFpZCA9IHJlLnNlYXJjaChyJ2FwcGxpY2F0aW9uSWRccyo9XHMqXCIoW15cIl0rKVwiJywgYykuZ3JvdXAoMSkKQkxPQ0sgPSAiIiJwbHVnaW5zIHsKICAgIGlkICJjb20uYW5kcm9pZC5hcHBsaWNhdGlvbiIKICAgIGlkICJrb3RsaW4tYW5kcm9pZCIKICAgIGlkICJkZXYuZmx1dHRlci5mbHV0dGVyLWdyYWRsZS1wbHVnaW4iCn0KCmFuZHJvaWQgewogICAgc2lnbmluZ0NvbmZpZ3MgewogICAgICAgIHJlbGVhc2UgewogICAgICAgICAgICBrZXlBbGlhcyA9ICJLRVlfQUxJQVMiCiAgICAgICAgICAgIGtleVBhc3N3b3JkID0gIktFWV9QQVNTV09SRCIKICAgICAgICAgICAgc3RvcmVGaWxlID0gZmlsZSgiL3RtcC9yZWxlYXNlLmprcyIpCiAgICAgICAgICAgIHN0b3JlUGFzc3dvcmQgPSAiU1RPUkVfUEFTUyIKICAgICAgICB9CiAgICB9CiAgICBuYW1lc3BhY2UgPSAiTlNfUExBQ0VIT0xERVIiCiAgICBjb21waWxlU2RrID0gZmx1dHRlci5jb21waWxlU2RrVmVyc2lvbgogICAgbmRrVmVyc2lvbiA9IGZsdXR0ZXIubmRrVmVyc2lvbgoKICAgIGNvbXBpbGVPcHRpb25zIHsKICAgICAgICBzb3VyY2VDb21wYXRpYmlsaXR5ID0gSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgICAgICB0YXJnZXRDb21wYXRpYmlsaXR5ID0gSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgIH0KCiAgICBrb3RsaW5PcHRpb25zIHsKICAgICAgICBqdm1UYXJnZXQgPSBKYXZhVmVyc2lvbi5WRVJTSU9OXzFfOAogICAgfQoKICAgIGRlZmF1bHRDb25maWcgewogICAgICAgIGFwcGxpY2F0aW9uSWQgPSAiQVBQSURfUExBQ0VIT0xERVIiCiAgICAgICAgbWluU2RrID0gZmx1dHRlci5taW5TZGtWZXJzaW9uCiAgICAgICAgdGFyZ2V0U2RrID0gZmx1dHRlci50YXJnZXRTZGtWZXJzaW9uCiAgICAgICAgdmVyc2lvbkNvZGUgPSBmbHV0dGVyLnZlcnNpb25Db2RlCiAgICAgICAgdmVyc2lvbk5hbWUgPSBmbHV0dGVyLnZlcnNpb25OYW1lCiAgICB9CgogICAgYnVpbGRUeXBlcyB7CiAgICAgICAgcmVsZWFzZSB7CiAgICAgICAgICAgIHNpZ25pbmdDb25maWcgPSBzaWduaW5nQ29uZmlncy5yZWxlYXNlCiAgICAgICAgfQogICAgfQp9CgpmbHV0dGVyIHsKICAgIHNvdXJjZSA9ICIuLi8iCn0KIiIiCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnS0VZX0FMSUFTJywgJ3BsYXRmb3JtX3JlbGVhc2UnKQpCTE9DSyA9IEJMT0NLLnJlcGxhY2UoJ0tFWV9QQVNTV09SRCcsICdRdWl6TmluamEyMDI0IScpCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnU1RPUkVfUEFTUycsICdRdWl6TmluamEyMDI0IScpCkJMT0NLID0gQkxPQ0sucmVwbGFjZSgnTlNfUExBQ0VIT0xERVInLCBucykKQkxPQ0sgPSBCTE9DSy5yZXBsYWNlKCdBUFBJRF9QTEFDRUhPTERFUicsIGFpZCkKd2l0aCBvcGVuKCdhbmRyb2lkL2FwcC9idWlsZC5ncmFkbGUnLCAndycpIGFzIGY6IGYud3JpdGUoQkxPQ0spCnByaW50KCdTaWduaW5nIGNvbmZpZ3VyZWQnKQo=" | base64 -d > /tmp/configure_signing.py && python3 /tmp/configure_signing.py
@@ -71,23 +69,22 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Pre-build diagnostics
+      - name: Build Android debug APK
         run: |
-          echo "=== package_config.json ==="
-          cat .dart_tool/package_config.json 2>&1 | head -20
-          echo "=== flutter.gradle source check ==="
-          grep -r "source" android/app/build.gradle 2>&1
-          echo "=== android/build.gradle ==="
-          cat android/build.gradle 2>&1 | head -15
-          echo "=== android/settings.gradle ==="
-          cat android/settings.gradle 2>&1
+          set +e
+          flutter build apk --debug > build_debug.log 2>&1
+          EXIT=$?
+          echo "=== DEBUG BUILD EXIT CODE: $EXIT ==="
+          tail -80 build_debug.log
+          exit $EXIT
 
       - name: Build Android release APK
         run: |
           set +e
-          flutter build apk --release > build_apk.log 2>&1
+          flutter build apk --release > build_release.log 2>&1
           EXIT=$?
-          tail -80 build_apk.log
+          echo "=== RELEASE BUILD EXIT CODE: $EXIT ==="
+          tail -80 build_release.log
           exit $EXIT
 
       - name: Build Android release AAB
@@ -95,10 +92,12 @@ jobs:
           set +e
           flutter build appbundle --release > build_aab.log 2>&1
           EXIT=$?
+          echo "=== AAB BUILD EXIT CODE: $EXIT ==="
           tail -80 build_aab.log
           exit $EXIT
 
       - name: Upload APK artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
@@ -106,6 +105,7 @@ jobs:
           retention-days: 7
 
       - name: Upload AAB artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-aab
@@ -114,6 +114,7 @@ jobs:
 
       - name: Upload APK to Appetize.io
         id: upload
+        if: success()
         env:
           APPETIZE_TOKEN: ${{ secrets.APPETIZE_TOKEN }}
         run: |
@@ -130,74 +131,8 @@ jobs:
           BUILD_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
           echo "public_key=$BUILD_ID" >> $GITHUB_OUTPUT
 
-  build-ios:
-    runs-on: macos-14
-    outputs:
-      public_key: ${{ steps.upload.outputs.public_key }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.27.4
-          channel: stable
-
-      - name: Create Flutter project scaffold
-        run: |
-          set -e
-          ORG="com.quizninja"
-          PROJ="game7"
-          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
-          rm -rf android ios web linux macos windows test
-          cp -r _scaffold/android .
-          cp -r _scaffold/ios .
-          cp -r _scaffold/web .
-          cp -r _scaffold/linux .
-          cp -r _scaffold/macos .
-          cp -r _scaffold/windows .
-          cp -r _scaffold/test .
-          cp _scaffold/.gitignore .
-          rm -rf _scaffold
-          rm -rf .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
-          ls -la lib/main.dart
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build iOS simulator
-        run: |
-          flutter build ios --debug --simulator
-          cd build/ios/iphonesimulator
-          zip -r app-simulator.zip Runner.app
-
-      - name: Upload iOS build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-simulator
-          path: build/ios/iphonesimulator/app-simulator.zip
-          retention-days: 7
-
-      - name: Upload iOS build to Appetize.io
-        id: upload
-        env:
-          APPETIZE_TOKEN: ${{ secrets.APPETIZE_TOKEN }}
-        run: |
-          SHORT_ID="${{ github.event.inputs.game_id }}"
-          SHORT_ID="${SHORT_ID%%-*}"
-          SHORT_ID="${SHORT_ID:0:20}"
-          RESPONSE=$(curl -s -X POST \
-            -H "X-API-KEY: $APPETIZE_TOKEN" \
-            -F "file=@build/ios/iphonesimulator/app-simulator.zip" \
-            -F "platform=ios" \
-            -F "tags[]=$SHORT_ID" \
-            https://api.appetize.io/v2/builds)
-          echo "iOS response: $RESPONSE"
-          BUILD_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
-          echo "public_key=$BUILD_ID" >> $GITHUB_OUTPUT
-
   notify:
-    needs: [build-android, build-ios]
+    needs: [build-android]
     if: always() && needs.build-android.result == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -210,9 +145,7 @@ jobs:
           game_name = os.environ["GAME_NAME"]
           user_email = os.environ["USER_EMAIL"]
           android_url = os.environ["ANDROID_URL"]
-          ios_url = os.environ.get("IOS_URL", "")
           android_artifact = os.environ.get("ANDROID_ARTIFACT_URL", "")
-          ios_artifact = os.environ.get("IOS_ARTIFACT_URL", "")
           aab_artifact = os.environ.get("AAB_ARTIFACT_URL", "")
           game_id = os.environ["GAME_ID"]
           gmail_pass = os.environ["GMAIL_APP_PASSWORD"]
@@ -222,13 +155,9 @@ jobs:
           html += "<p><b>" + game_name + "</b> has been built and is ready to preview on Appetize.io.</p>"
           html += "<h3>Live Preview</h3>"
           html += "<p><b>Android:</b> <a href='" + android_url + "'>" + android_url + "</a></p>"
-          if ios_url:
-              html += "<p><b>iOS:</b> <a href='" + ios_url + "'>" + ios_url + "</a></p>"
           html += "<h3>Download Builds</h3>"
           if android_artifact:
               html += "<p><b>Android APK:</b> <a href='" + android_artifact + "'>Download APK</a></p>"
-          if ios_artifact:
-              html += "<p><b>iOS Simulator:</b> <a href='" + ios_artifact + "'>Download iOS Build</a></p>"
           if aab_artifact:
               html += "<p><b>Play Store AAB:</b> <a href='" + aab_artifact + "'>Download AAB</a> (submit to Play Console)</p>"
           html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
@@ -252,7 +181,6 @@ jobs:
           USER_EMAIL: ${{ github.event.inputs.user_email }}
           GAME_ID: ${{ github.event.inputs.game_id }}
           ANDROID_KEY: ${{ needs.build-android.outputs.public_key }}
-          IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
           RUN_ID: ${{ github.run_id }}
           REPO: ${{ github.repository }}
         run: |
@@ -261,19 +189,11 @@ jobs:
             exit 0
           fi
           export ANDROID_URL="https://appetize.io/app/$ANDROID_KEY?autoplay=true"
-          export IOS_URL=""
-          export ANDROID_ARTIFACT_URL=""
-          export IOS_ARTIFACT_URL=""
-          if [ -n "$IOS_KEY" ]; then
-            export IOS_URL="https://appetize.io/app/$IOS_KEY?autoplay=true"
-          fi
           export ANDROID_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-apk"
-          export IOS_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/ios-simulator"
           export AAB_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-aab"
           if [ -z "$GMAIL_APP_PASSWORD" ]; then
             echo "No Gmail app password, skipping email"
             echo "::notice::Android Preview: $ANDROID_URL"
-            echo "::notice::iOS Preview: $IOS_URL"
             exit 0
           fi
           python3 /tmp/send_email.py
@@ -282,13 +202,10 @@ jobs:
         if: always()
         env:
           ANDROID_KEY: ${{ needs.build-android.outputs.public_key }}
-          IOS_KEY: ${{ needs.build-ios.outputs.public_key }}
         run: |
           echo "=========================================="
           echo "  GAME BUILD COMPLETE!"
           echo "=========================================="
           echo "Android: https://appetize.io/app/$ANDROID_KEY"
-          echo "iOS: https://appetize.io/app/$IOS_KEY"
           echo "=========================================="
           echo "::notice::Android Preview: https://appetize.io/app/$ANDROID_KEY"
-          echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
