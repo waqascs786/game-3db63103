@@ -81,7 +81,7 @@ jobs:
             --repo "${{ github.repository }}" \
             --title "iOS Build: ${{ github.event.inputs.game_name }}" \
             --notes "iOS simulator build for ${{ github.event.inputs.game_name }}" \
-            build/ios/iphonesimulator/app-simulator.zip#ios-simulator.zip
+            build/ios/iphonesimulator/app-simulator.zip
           IOS_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/ios-simulator.zip"
           echo "ios_url=$IOS_URL" >> $GITHUB_OUTPUT
 
