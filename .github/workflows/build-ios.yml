@@ -1,0 +1,97 @@
+name: Build iOS Simulator
+
+on:
+  workflow_dispatch:
+    inputs:
+      game_id:
+        description: 'Game ID'
+        required: true
+      game_name:
+        description: 'Game Name'
+        required: true
+      user_email:
+        description: 'User email for notifications'
+        required: false
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    outputs:
+      public_key: ${{ steps.upload.outputs.public_key }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.4
+          channel: stable
+
+      - name: Save source files
+        run: |
+          mkdir -p /tmp/saved
+          cp -r lib /tmp/saved/lib
+          cp pubspec.yaml /tmp/saved/pubspec.yaml
+          cp pubspec.lock /tmp/saved/pubspec.lock 2>/dev/null || true
+
+      - name: Create Flutter scaffold in workspace
+        run: |
+          ORG="com.quizninja"
+          PROJ="game7"
+          flutter create --org "$ORG" --project-name "$PROJ" . 2>&1 | tail -5
+
+      - name: Restore source files
+        run: |
+          rm -rf lib
+          cp -r /tmp/saved/lib .
+          cp /tmp/saved/pubspec.yaml .
+          cp /tmp/saved/pubspec.lock . 2>/dev/null || true
+          echo "=== Verify ==="
+          ls -la lib/main.dart
+          head -3 lib/main.dart
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build iOS simulator
+        run: |
+          flutter build ios --debug --simulator
+          cd build/ios/iphonesimulator
+          zip -r app-simulator.zip Runner.app
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator
+          path: build/ios/iphonesimulator/app-simulator.zip
+          retention-days: 7
+
+      - name: Upload iOS build to Appetize.io
+        id: upload
+        env:
+          APPETIZE_TOKEN: ${{ secrets.APPETIZE_TOKEN }}
+        run: |
+          SHORT_ID="${{ github.event.inputs.game_id }}"
+          SHORT_ID="${SHORT_ID%%-*}"
+          SHORT_ID="${SHORT_ID:0:20}"
+          RESPONSE=$(curl -s -X POST \
+            -H "X-API-KEY: $APPETIZE_TOKEN" \
+            -F "file=@build/ios/iphonesimulator/app-simulator.zip" \
+            -F "platform=ios" \
+            -F "tags[]=$SHORT_ID" \
+            https://api.appetize.io/v2/builds)
+          echo "iOS response: $RESPONSE"
+          BUILD_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
+          echo "public_key=$BUILD_ID" >> $GITHUB_OUTPUT
+
+      - name: Print preview link
+        if: always()
+        env:
+          IOS_KEY: ${{ steps.upload.outputs.public_key }}
+        run: |
+          echo "=========================================="
+          echo "  iOS BUILD COMPLETE!"
+          echo "=========================================="
+          echo "iOS: https://appetize.io/app/$IOS_KEY"
+          echo "=========================================="
+          echo "::notice::iOS Preview: https://appetize.io/app/$IOS_KEY"
