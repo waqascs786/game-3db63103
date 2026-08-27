@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       public_key: ${{ steps.upload.outputs.public_key }}
+      apk_url: ${{ steps.release.outputs.apk_url }}
+      aab_url: ${{ steps.release.outputs.aab_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,8 +44,8 @@ jobs:
 
       - name: Create Flutter scaffold in workspace
         run: |
-          ORG="com.android"
-          PROJ="game7"
+          ORG="com.quizninja"
+          PROJ="game_app"
           flutter create --org "$ORG" --project-name "$PROJ" . 2>&1 | tail -5
 
       - name: Restore source files
@@ -100,6 +102,24 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+      - name: Create GitHub Release with downloads
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="release-${{ github.event.inputs.game_id }}"
+          gh release delete "$TAG" --repo "${{ github.repository }}" -y 2>/dev/null || true
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --title "Build: ${{ github.event.inputs.game_name }}" \
+            --notes "Automated build for ${{ github.event.inputs.game_name }}" \
+            build/app/outputs/flutter-apk/app-release.apk#game-release.apk \
+            build/app/outputs/bundle/release/app-release.aab#game-release.aab
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/game-release.apk"
+          AAB_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/game-release.aab"
+          echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
+          echo "aab_url=$AAB_URL" >> $GITHUB_OUTPUT
+
       - name: Upload APK to Appetize.io
         id: upload
         env:
@@ -132,16 +152,19 @@ jobs:
           game_name = os.environ["GAME_NAME"]
           user_email = os.environ["USER_EMAIL"]
           android_url = os.environ["ANDROID_URL"]
-          android_artifact = os.environ.get("ANDROID_ARTIFACT_URL", "")
-          aab_artifact = os.environ.get("AAB_ARTIFACT_URL", "")
+          apk_url = os.environ.get("APK_URL", "")
+          aab_url = os.environ.get("AAB_URL", "")
           game_id = os.environ["GAME_ID"]
           gmail_pass = os.environ["GMAIL_APP_PASSWORD"]
-          run_id = os.environ["RUN_ID"]
-          repo = os.environ["REPO"]
           html = "<h2>Your game is ready!</h2>"
           html += "<p><b>" + game_name + "</b> has been built and is ready to preview on Appetize.io.</p>"
           html += "<h3>Live Preview</h3>"
           html += "<p><b>Android:</b> <a href='" + android_url + "'>" + android_url + "</a></p>"
+          html += "<h3>Download Builds</h3>"
+          if apk_url:
+              html += "<p><b>Android APK:</b> <a href='" + apk_url + "'>Download APK</a></p>"
+          if aab_url:
+              html += "<p><b>Play Store AAB:</b> <a href='" + aab_url + "'>Download AAB</a> (submit to Play Console)</p>"
           html += "<hr><p><small>Game ID: " + game_id + "</small></p>"
           msg = MIMEMultipart("alternative")
           msg["Subject"] = "Game Build Ready: " + game_name
@@ -163,16 +186,14 @@ jobs:
           USER_EMAIL: ${{ github.event.inputs.user_email }}
           GAME_ID: ${{ github.event.inputs.game_id }}
           ANDROID_KEY: ${{ needs.build-android.outputs.public_key }}
-          RUN_ID: ${{ github.run_id }}
-          REPO: ${{ github.repository }}
+          APK_URL: ${{ needs.build-android.outputs.apk_url }}
+          AAB_URL: ${{ needs.build-android.outputs.aab_url }}
         run: |
           if [ -z "$USER_EMAIL" ]; then
             echo "No user email, skipping notification"
             exit 0
           fi
           export ANDROID_URL="https://appetize.io/app/$ANDROID_KEY?autoplay=true"
-          export ANDROID_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-apk"
-          export AAB_ARTIFACT_URL="https://github.com/$REPO/actions/runs/$RUN_ID/artifact/android-aab"
           if [ -z "$GMAIL_APP_PASSWORD" ]; then
             echo "No Gmail app password, skipping email"
             echo "::notice::Android Preview: $ANDROID_URL"
