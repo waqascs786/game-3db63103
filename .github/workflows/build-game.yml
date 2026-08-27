@@ -47,17 +47,18 @@ jobs:
           set -e
           ORG="com.android"
           PROJ="game7"
-          rm -rf android ios web linux macos windows test .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
-          cd /tmp && flutter create --org "$ORG" --project-name "$PROJ" _scaffold
-          cp -r /tmp/_scaffold/android "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/ios "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/web "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/linux "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/macos "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/windows "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/test "$GITHUB_WORKSPACE/"
-          cp /tmp/_scaffold/.gitignore "$GITHUB_WORKSPACE/"
-          rm -rf /tmp/_scaffold
+          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
+          rm -rf android ios web linux macos windows test
+          cp -r _scaffold/android .
+          cp -r _scaffold/ios .
+          cp -r _scaffold/web .
+          cp -r _scaffold/linux .
+          cp -r _scaffold/macos .
+          cp -r _scaffold/windows .
+          cp -r _scaffold/test .
+          cp _scaffold/.gitignore .
+          rm -rf _scaffold
+          rm -rf .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
           ls -la lib/main.dart
 
       - name: Configure Android signing
@@ -122,17 +123,18 @@ jobs:
           set -e
           ORG="com.quizninja"
           PROJ="game7"
-          rm -rf android ios web linux macos windows test .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
-          cd /tmp && flutter create --org "$ORG" --project-name "$PROJ" _scaffold
-          cp -r /tmp/_scaffold/android "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/ios "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/web "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/linux "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/macos "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/windows "$GITHUB_WORKSPACE/"
-          cp -r /tmp/_scaffold/test "$GITHUB_WORKSPACE/"
-          cp /tmp/_scaffold/.gitignore "$GITHUB_WORKSPACE/"
-          rm -rf /tmp/_scaffold
+          flutter create --org "$ORG" --project-name "$PROJ" _scaffold
+          rm -rf android ios web linux macos windows test
+          cp -r _scaffold/android .
+          cp -r _scaffold/ios .
+          cp -r _scaffold/web .
+          cp -r _scaffold/linux .
+          cp -r _scaffold/macos .
+          cp -r _scaffold/windows .
+          cp -r _scaffold/test .
+          cp _scaffold/.gitignore .
+          rm -rf _scaffold
+          rm -rf .dart_tool .flutter-plugins .flutter-plugins-dependencies .metadata pubspec.lock
           ls -la lib/main.dart
 
       - name: Get dependencies
