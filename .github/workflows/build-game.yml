@@ -28,9 +28,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Decode signing keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
+        run: echo "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" | base64 -d > /tmp/release.jks
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -63,16 +61,12 @@ jobs:
           rm -rf _scaffold _pubspec_bak.yaml _lib_bak
 
       - name: Configure Android signing
-        env:
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           cat > /tmp/configure_signing.py << "SIGNINGEOF"
-          import re, os, sys
-          alias = os.environ["ANDROID_KEY_ALIAS"]
-          password = os.environ["ANDROID_KEY_PASSWORD"]
-          store_pass = os.environ["ANDROID_KEYSTORE_PASSWORD"]
+          import re, sys
+          alias = "platform_release"
+          password = "QuizNinja2024!"
+          store_pass = "QuizNinja2024!"
           gradle_path = "android/app/build.gradle"
           try:
               with open(gradle_path, "r") as f:
