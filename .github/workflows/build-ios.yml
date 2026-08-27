@@ -39,7 +39,8 @@ jobs:
         run: |
           ORG="com.quizninja"
           PROJ="gameApp"
-          flutter create --org "$ORG" --project-name "$PROJ" . 2>&1 | tail -5
+          rm -rf android ios macos linux windows web test
+          flutter create --org "$ORG" --project-name "$PROJ" --platforms ios . 2>&1 | tail -5
 
       - name: Restore source files
         run: |
