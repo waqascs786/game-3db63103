@@ -40,7 +40,7 @@ jobs:
       - name: Create Flutter scaffold in workspace
         run: |
           ORG="com.quizninja"
-          PROJ="gameApp"
+          PROJ="gameapp"
           rm -rf android ios macos linux windows web test
           flutter create --org "$ORG" --project-name "$PROJ" --platforms ios . 2>&1 | tail -5
 
