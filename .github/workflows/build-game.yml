@@ -16,6 +16,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       public_key: ${{ steps.upload.outputs.public_key }}
       apk_url: ${{ steps.release.outputs.apk_url }}
